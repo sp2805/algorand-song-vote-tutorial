@@ -250,6 +250,9 @@ function App() {
       <div className="dataContainer">
         <div className="header">🍺 What kind of beer do you like?</div>
         <div className="bio">
+        <div >
+          <p> Hello </p>
+        </div>
           <b>Vote for your favourite beer.</b>
         </div>
         <div className="bio"><b>Rules: Unlimited voting, get to clicking!🍻</b></div>

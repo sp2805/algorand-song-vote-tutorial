@@ -30,37 +30,45 @@ int 1
 ==
 assert
 txna ApplicationArgs 0
-byte "Add"
+byte "AddC1"
 ==
 bnz main_l13
 txna ApplicationArgs 0
-byte "Deduct"
+byte "AddC2"
 ==
-bnz main_l10
+bnz main_l12
+txna ApplicationArgs 0
+byte "AddC3"
+==
+bnz main_l11
 err
-main_l10:
-byte "Count"
+main_l11:
+byte "Count3"
 app_global_get
 store 0
+byte "Count3"
 load 0
-int 0
->
-bnz main_l12
-main_l11:
+int 1
++
+app_global_put
 int 1
 return
 main_l12:
-byte "Count"
-load 0
-int 1
--
-app_global_put
-b main_l11
-main_l13:
-byte "Count"
+byte "Count2"
 app_global_get
 store 0
-byte "Count"
+byte "Count2"
+load 0
+int 1
++
+app_global_put
+int 1
+return
+main_l13:
+byte "Count1"
+app_global_get
+store 0
+byte "Count1"
 load 0
 int 1
 +
@@ -80,7 +88,13 @@ main_l17:
 int 0
 return
 main_l18:
-byte "Count"
+byte "Count1"
+int 0
+app_global_put
+byte "Count2"
+int 0
+app_global_put
+byte "Count3"
 int 0
 app_global_put
 int 1

@@ -9,8 +9,10 @@ function App() {
   const [currentAccount, setCurrentAccount] = useState<string | null>();
   const [voteState1, setVoteState1] = useState("Vote");
   const [voteState2, setVoteState2] = useState("Vote");
+  const [voteState3, setVoteState3] = useState("Vote");
   const [Count1, setCount1] = useState(0);
   const [Count2, setCount2] = useState(0);
+  const [Count3, setCount3] = useState(0);
   const [walletbalance, setwalletbalance] = useState<number>(0);
 
   const peraWallet = new PeraWalletConnect({
@@ -20,7 +22,7 @@ function App() {
   });
 
   // CHANGE THIS TO YOUR APP ID
-  const app_address: number = YOUR_APP_ID;
+  const app_address: number = 655401411;
   // CHANGE THIS TO YOUR APP ID
 
   const baseServer = "https://testnet-api.algonode.cloud";
@@ -84,7 +86,7 @@ function App() {
     });
     setVoteState1("Processing. . .");
     await algodClient.sendRawTransaction(decodedResult as any).do();
-    await algosdk.waitForConfirmation(algodClient, txId, 2);
+    await algosdk.waitForConfirmation(algodClient, txId, 3);
     console.log("Adding to Count1");
     let transactionResponse = await algodClient
       .pendingTransactionInformation(txId)
@@ -129,7 +131,7 @@ function App() {
     // send and await
     setVoteState2("Processing. . .");
     await algodClient.sendRawTransaction(decodedResult as any).do();
-    await algosdk.waitForConfirmation(algodClient, txId, 2);
+    await algosdk.waitForConfirmation(algodClient, txId, 3);
     let transactionResponse = await algodClient
       .pendingTransactionInformation(txId)
       .do();
@@ -142,6 +144,52 @@ function App() {
       await getCount();
     }
     setVoteState2("Vote");
+  };
+
+  const addC3 = async () => {
+    if (!currentAccount) {
+      console.log("Please connect wallet");
+      return;
+    }
+    let sender = currentAccount;
+    let appArgs = [];
+    appArgs.push(new Uint8Array(Buffer.from("AddC3")));
+    let params = await algodClient.getTransactionParams().do();
+    const txn = algosdk.makeApplicationNoOpTxn(
+      sender,
+      params,
+      app_address,
+      appArgs
+    );
+    let txId = txn.txID().toString();
+
+    // time to sign . . . which we have to do with walletconnect
+    const SignerTransaction = [{ txn }];
+
+    setVoteState3("Sign txn in wallet");
+
+    const result = await peraWallet.signTransaction([SignerTransaction]);
+
+    //const result = await connector.sendCustomRequest(request);
+    const decodedResult = result.map((element: any) => {
+      return element ? new Uint8Array(Buffer.from(element, "base64")) : null;
+    });
+    setVoteState1("Processing. . .");
+    await algodClient.sendRawTransaction(decodedResult as any).do();
+    await algosdk.waitForConfirmation(algodClient, txId, 3);
+    console.log("Adding to Count3");
+    let transactionResponse = await algodClient
+      .pendingTransactionInformation(txId)
+      .do();
+    console.log("Called app-id:", transactionResponse["txn"]["txn"]["apid"]);
+    if (transactionResponse["global-state-delta"] !== undefined) {
+      console.log(
+        "Global State updated:",
+        transactionResponse["global-state-delta"]
+      );
+      await getCount();
+    }
+    setVoteState3("Vote");
   };
 
   const getBalance = async () => {
@@ -167,6 +215,8 @@ function App() {
     setCount1(globalState[0]["value"]["uint"]);
     console.log("Count2: ", globalState[1]["value"]["uint"]);
     setCount2(globalState[1]["value"]["uint"]);
+    console.log("Count3: ", globalState[2]["value"]["uint"]);
+    setCount3(globalState[2]["value"]["uint"]);
   };
 
   useEffect(() => {
@@ -190,6 +240,7 @@ function App() {
     getCount();
     setVoteState1("Vote");
     setVoteState2("Vote");
+    setVoteState3("Vote");
     getBalance();
     console.log("currentAccount:", currentAccount);
   }, [currentAccount]);
@@ -197,12 +248,11 @@ function App() {
   return (
     <div className="mainContainer">
       <div className="dataContainer">
-        <div className="header">🎧︎ What kind of music do you like?</div>
+        <div className="header">🍺 What kind of beer do you like?</div>
         <div className="bio">
-          Vote for the better music genre. Ensure your wallet is set to the{" "}
-          <b>testnet</b>.
+          <b>Vote for your favourite beer.</b>
         </div>
-        <div className="bio">Rules: Unlimited voting, get to clicking!</div>
+        <div className="bio"><b>Rules: Unlimited voting, get to clicking!🍻</b></div>
 
         {!currentAccount && (
           <button className="walletButton" onClick={handleConnectWalletClick}>
@@ -231,17 +281,24 @@ function App() {
               <>
                 <div className="songs-container">
                   <div className="song-card">
-                    <div className="title">EDM</div>
+                    <div className="title">GUINNESS</div>
                     <div className="count">{Count1}</div>
                     <button className="mathButton" onClick={addC1}>
                       {voteState1}
                     </button>
                   </div>
                   <div className="song-card">
-                    <div className="title">Pop</div>
+                    <div className="title">PERONI</div>
                     <div className="count">{Count2}</div>
                     <button className="mathButton" onClick={addC2}>
                       {voteState2}
+                    </button>
+                  </div>
+                  <div className="song-card">
+                    <div className="title">ASAHI</div>
+                    <div className="count">{Count3}</div>
+                    <button className="mathButton" onClick={addC3}>
+                      {voteState3}
                     </button>
                   </div>
                 </div>
